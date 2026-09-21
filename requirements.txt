@@ -1,0 +1,4 @@
+fonttools>=4.48.0
+Pillow>=10.2.0
+requests>=2.31.0
+aiohttp>=3.9.3
