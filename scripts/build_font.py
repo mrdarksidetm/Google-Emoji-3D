@@ -19,6 +19,7 @@ try:
     from fontTools.ttLib.tables._s_b_i_x import table__s_b_i_x
     from fontTools.ttLib.tables.sbixStrike import Strike
     from fontTools.ttLib.tables.sbixGlyph import Glyph as SbixGlyph
+    from fontTools.ttLib.tables.O_S_2f_2 import Panose
     from fontTools.ttLib.tables import otTables
     from PIL import Image
 except ImportError as e:
@@ -135,12 +136,12 @@ def create_base_font(glyph_order):
     os2.yStrikeoutSize = 50
     os2.yStrikeoutPosition = 300
     os2.sFamilyClass = 0
-    os2.panose = struct.pack('10B', 2, 0, 5, 0, 0, 0, 0, 0, 0, 0)
+    os2.panose = Panose(bFamilyType=2, bSerifStyle=0, bWeight=5)
     os2.ulUnicodeRange1 = 0
     os2.ulUnicodeRange2 = 0
     os2.ulUnicodeRange3 = 0
     os2.ulUnicodeRange4 = 0
-    os2.achVendID = b'GOOG'
+    os2.achVendID = "GOOG"
     os2.fsSelection = 0x0040  # Regular
     os2.usFirstCharIndex = 0x0020
     os2.usLastCharIndex = 0xFFFF
