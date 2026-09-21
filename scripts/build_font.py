@@ -16,12 +16,14 @@ try:
     from fontTools.ttLib import TTFont, newTable
     from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
     from fontTools.ttLib.tables._g_l_y_f import Glyph
-    from fontTools.ttLib.tables._s_b_i_x import table__s_b_i_x, Strike, Glyph as SbixGlyph
+    from fontTools.ttLib.tables._s_b_i_x import table__s_b_i_x
+    from fontTools.ttLib.tables.sbixStrike import Strike
+    from fontTools.ttLib.tables.sbixGlyph import Glyph as SbixGlyph
     from fontTools.ttLib.tables.DefaultTable import DefaultTable
     from fontTools.otlLib.builder import buildLigatureSubst
     from PIL import Image
-except ImportError:
-    print("[-] Missing fontTools or Pillow. Install with: pip install fonttools pillow")
+except ImportError as e:
+    print(f"[-] Missing dependency or import error: {e}. Install with: pip install fonttools pillow")
     sys.exit(1)
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -299,7 +301,7 @@ def build_sbix_table(font, glyph_png_map, strike_res=128):
     sbix.version = 1
     sbix.flags = 1
 
-    strike = Strike(strike_res, 72)
+    strike = Strike(ppem=strike_res, resolution=72)
     strike.glyphs = {}
 
     for glyph_name in font.getGlyphOrder():
@@ -308,7 +310,13 @@ def build_sbix_table(font, glyph_png_map, strike_res=128):
             # Center emoji within the glyph metrics box
             origin_x = 0
             origin_y = DESCENDER
-            sbix_glyph = SbixGlyph(glyph_name, origin_x, origin_y, b"png ", png_bytes)
+            sbix_glyph = SbixGlyph(
+                glyphName=glyph_name,
+                originOffsetX=origin_x,
+                originOffsetY=origin_y,
+                graphicType="png ",
+                imageData=png_bytes
+            )
             strike.glyphs[glyph_name] = sbix_glyph
 
     sbix.strikes = {strike_res: strike}

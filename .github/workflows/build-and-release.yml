@@ -1,6 +1,9 @@
 name: Build and Release Google Emoji 3D TTF
 
 on:
+  schedule:
+    # Autonomous sync & rebuild when new 3D PNG assets are published by Google
+    - cron: '0 0 * * 0'
   workflow_dispatch:
     inputs:
       resolution:
@@ -18,12 +21,19 @@ on:
         required: false
         type: number
         default: 50
+      tag_name:
+        description: 'Release tag to update / overwrite'
+        required: false
+        type: string
+        default: 'v1.0.0'
       create_release:
-        description: 'Publish as GitHub Release'
+        description: 'Publish / Overwrite as GitHub Release'
         required: false
         type: boolean
         default: true
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
@@ -99,16 +109,17 @@ jobs:
             build/*.zip
             data/categories_manifest.json
 
-      - name: Create GitHub Release
-        if: ${{ inputs.create_release != false || startsWith(github.ref, 'refs/tags/v') }}
+      - name: Create or Overwrite GitHub Release
+        if: ${{ inputs.create_release != false || startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name != 'main' && github.ref_name || format('v1.0.0-{0}', github.run_number) }}
-          name: Google Emoji 3D ${{ github.ref_name != 'main' && github.ref_name || format('v1.0.0 (Build {0})', github.run_number) }}
+          tag_name: ${{ inputs.tag_name || 'v1.0.0' }}
+          name: Google Emoji 3D (v1.0.0 - Latest Rolling Release)
           body: |
             ## 🎨 Google Emoji 3D (Android 17 Volumetric Style)
 
-            TrueType (`.ttf`) color emoji font compiled from Google's official 3D Noto Emoji assets.
+            TrueType (`.ttf`) color emoji font compiled autonomously from Google's official 3D Noto Emoji assets.
+            This single rolling release is continuously updated, overwriting the font asset with newly patched 3D emojis.
 
             ### 📦 Release Details
             - **Font File:** `GoogleEmoji3D.ttf` (${{ env.FONT_SIZE_MB }} MB)
@@ -130,3 +141,5 @@ jobs:
             build/GoogleEmoji3D.ttf
             build/${{ env.ARCHIVE_NAME }}
             data/categories_manifest.json
+          make_latest: true
+          overwrite: true

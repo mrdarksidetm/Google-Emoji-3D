@@ -90,7 +90,7 @@ def verify_font(font_path):
         print(f"  • Strike PPEM {strike_ppem}: {glyph_count} bitmap glyphs embedded")
         if glyph_count > 0:
             sample_glyph = list(strike.glyphs.values())[0]
-            if sample_glyph.graphicType == b"png ":
+            if sample_glyph.graphicType in (b"png ", "png "):
                 print(f"  [OK] Sample bitmap glyph format verified as PNG ({len(sample_glyph.imageData)} bytes)")
 
     print("\n" + "=" * 50)
