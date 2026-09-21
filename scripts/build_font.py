@@ -187,7 +187,7 @@ def create_base_font(glyph_order):
     post.isFixedPitch = 1
     post.minMemType42 = 0
     post.maxMemType42 = 0
-    post.mimMemType1 = 0
+    post.minMemType1 = 0
     post.maxMemType1 = 0
     font['post'] = post
 
