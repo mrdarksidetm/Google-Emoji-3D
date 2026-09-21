@@ -19,8 +19,7 @@ try:
     from fontTools.ttLib.tables._s_b_i_x import table__s_b_i_x
     from fontTools.ttLib.tables.sbixStrike import Strike
     from fontTools.ttLib.tables.sbixGlyph import Glyph as SbixGlyph
-    from fontTools.ttLib.tables.DefaultTable import DefaultTable
-    from fontTools.otlLib.builder import buildLigatureSubst
+    from fontTools.ttLib.tables import otTables
     from PIL import Image
 except ImportError as e:
     print(f"[-] Missing dependency or import error: {e}. Install with: pip install fonttools pillow")
