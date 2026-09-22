@@ -2,8 +2,8 @@ name: Build and Release Google Emoji 3D TTF
 
 on:
   schedule:
-    # Autonomous sync & rebuild when new 3D PNG assets are published by Google
-    - cron: '0 0 * * 0'
+    # Autonomous sync & rebuild when new 3D PNG assets are published by Google (Daily at 02:00 UTC)
+    - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       resolution:
