@@ -16,9 +16,6 @@ from io import BytesIO
 
 try:
     from fontTools.ttLib import TTFont, newTable
-    from fontTools.ttLib.tables.sbixStrike import Strike
-    from fontTools.ttLib.tables.sbixGlyph import Glyph as SbixGlyph
-    from fontTools.ttLib.tables._s_b_i_x import table__s_b_i_x
     from PIL import Image
 except ImportError as e:
     print(f"[-] Missing dependency or import error: {e}. Install with: pip install fonttools pillow")
@@ -132,37 +129,10 @@ def update_name_table(font):
         name_table.setName(value, name_id, 3, 1, 0x409)
         name_table.setName(value, name_id, 1, 0, 0)
 
-def build_sbix_table(font, glyph_png_map, strike_res=128):
-    """
-    Build complementary OpenType 'sbix' table embedding 3D PNG bitmaps.
-    Provides dual-engine compatibility (CBDT for Android/Instaprime/Chromium, sbix for Apple/desktop).
-    """
-    sbix = newTable('sbix')
-    sbix.version = 1
-    sbix.flags = 1
-
-    strike = Strike(ppem=strike_res, resolution=72)
-    strike.glyphs = {}
-
-    descender = font["hhea"].descent if "hhea" in font else -174
-
-    for glyph_name, png_bytes in glyph_png_map.items():
-        sbix_glyph = SbixGlyph(
-            glyphName=glyph_name,
-            originOffsetX=0,
-            originOffsetY=descender,
-            graphicType="png ",
-            imageData=png_bytes
-        )
-        strike.glyphs[glyph_name] = sbix_glyph
-
-    sbix.strikes = {strike_res: strike}
-    font['sbix'] = sbix
-
 def patch_cbdt_table(font, glyph_png_map):
     """
     Patches Google's native CBDT (Color Bitmap Data Table) by replacing matching
-    glyph bitmaps with our 3D PNGs.
+    glyph bitmaps with our 3D PNGs and aligning format 17 metrics.
     """
     if "CBDT" not in font or "CBLC" not in font:
         print("[-] CBDT/CBLC table missing from base font!")
@@ -177,6 +147,12 @@ def patch_cbdt_table(font, glyph_png_map):
                 try:
                     bitmap.decompile()
                     bitmap.imageData = glyph_png_map[glyph_name]
+                    if hasattr(bitmap, "metrics") and bitmap.metrics is not None:
+                        bitmap.metrics.width = 136
+                        bitmap.metrics.height = 128
+                        bitmap.metrics.BearingX = 0
+                        bitmap.metrics.BearingY = 101
+                        bitmap.metrics.Advance = 136
                     patched_count += 1
                 except Exception:
                     pass
@@ -213,7 +189,21 @@ def compile_google_emoji_3d():
             continue
 
         with open(png_path, "rb") as f:
-            png_bytes = f.read()
+            raw_bytes = f.read()
+
+        try:
+            img = Image.open(BytesIO(raw_bytes)).convert("RGBA")
+            if img.size != (128, 128):
+                img = img.resize((128, 128), Image.Resampling.LANCZOS)
+            # Center on 136x128 canvas with transparent margins (4px left/right)
+            # perfectly matching NotoColorEmoji native CBDT Format 17 cell metrics
+            canvas = Image.new("RGBA", (136, 128), (0, 0, 0, 0))
+            canvas.paste(img, (4, 0))
+            out_buf = BytesIO()
+            canvas.save(out_buf, format="PNG", optimize=True)
+            png_bytes = out_buf.getvalue()
+        except Exception:
+            png_bytes = raw_bytes
 
         glyph_name = codepoint_to_glyph.get(codepoint_hex)
         if not glyph_name:
@@ -234,8 +224,9 @@ def compile_google_emoji_3d():
     cbdt_patched = patch_cbdt_table(font, glyph_png_map)
     print(f"[+] Successfully patched {cbdt_patched} glyphs in CBDT table.")
 
-    print("[*] Embedding complementary sbix color bitmap strike for cross-platform support...")
-    build_sbix_table(font, glyph_png_map, strike_res=128)
+    # Strip redundant sbix table if present to keep font pure native Android CBDT/CBLC
+    if "sbix" in font:
+        del font["sbix"]
 
     print("[*] Updating font identity metadata in 'name' table...")
     update_name_table(font)

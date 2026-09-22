@@ -130,9 +130,9 @@ jobs:
 
             ### 📦 Release Details
             - **Font File:** `GoogleEmoji3D.ttf` (${{ env.FONT_SIZE_MB }} MB)
-            - **Bitmap Resolution:** ${{ inputs.resolution || '128' }}x${{ inputs.resolution || '128' }} px
-            - **Format:** OpenType / TrueType with `sbix` color bitmap strikes, `cmap` Format 12, and `GSUB` sequence ligatures.
-            - **Compatible with:** Gboard (via Custom Emoji Font feature in [mrdarksidetm/Gboard-patches](https://github.com/mrdarksidetm/Gboard-patches)), Android system font mods, Windows 10/11, macOS, and Linux.
+            - **Format:** OpenType / TrueType native Android `CBDT`/`CBLC` color bitmap strikes with exact Format 17 136x128 metrics, `cmap` Format 12, and `GSUB` sequence ligatures.
+            - **Base Font:** Official Google Android `NotoColorEmoji.ttf` (Unicode 17.0, v2.051) with native OpenType tables, patched with Google 3D volumetric assets.
+            - **Compatible with:** Gboard (via Custom Emoji Font in [mrdarksidetm/Gboard-patches](https://github.com/mrdarksidetm/Gboard-patches)), Instaprime, Instagram, WhatsApp, Android system font managers, and Linux/FreeType apps.
 
             ### 📁 Included Assets
             - `GoogleEmoji3D.ttf`: Standalone emoji font file ready to load in Gboard or install on system.

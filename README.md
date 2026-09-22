@@ -35,11 +35,11 @@ All assets are fetched, categorized, and compiled entirely in **GitHub Actions c
   - Objects
   - Symbols
   - Flags
-- **Universal OpenType Compatibility:**
-  - Embedded `sbix` color bitmap strikes for crystal-clear rendering.
-  - Unicode `cmap` Format 12 (32-bit UCS-4) and Format 4 (16-bit BMP).
-  - OpenType `GSUB` Ligature Substitution (LookupType 4) for multi-codepoint sequences.
-- **Rootless Gboard Integration:** Works out of the box with the **Custom Emoji Font (.ttf)** feature in [mrdarksidetm/Gboard-patches](https://github.com/mrdarksidetm/Gboard-patches) without requiring root, Magisk, or system partition modifications!
+- **Native Android & OpenType Compatibility:**
+  - Native Android `CBDT`/`CBLC` Color Bitmap Data and Location tables preserving official `NotoColorEmoji` metrics.
+  - Unicode `cmap` Format 12 (32-bit UCS-4) mapping all standard emoji codepoints.
+  - OpenType `GSUB` Ligature Substitution (LookupType 4) for multi-codepoint ZWJ sequences.
+- **Rootless Gboard & Instaprime Integration:** Works seamlessly with Instaprime and the **Custom Emoji Font (.ttf)** feature in [mrdarksidetm/Gboard-patches](https://github.com/mrdarksidetm/Gboard-patches) without requiring root, Magisk, or system partition modifications!
 
 ---
 

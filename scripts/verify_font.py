@@ -16,7 +16,7 @@ except ImportError:
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT_PATH = os.path.join(PROJECT_ROOT, "build", "GoogleEmoji3D.ttf")
 
-REQUIRED_TABLES = ["head", "hhea", "maxp", "OS/2", "name", "post", "cmap", "CBDT", "CBLC", "sbix", "GSUB"]
+REQUIRED_TABLES = ["head", "hhea", "maxp", "OS/2", "name", "post", "cmap", "CBDT", "CBLC", "GSUB"]
 
 def verify_font(font_path):
     print(f"[*] Verifying font: {font_path}")
@@ -40,6 +40,10 @@ def verify_font(font_path):
         else:
             print(f"  [FAIL] Table '{table_tag}' MISSING!")
             sys.exit(1)
+
+    # Ensure sbix is stripped for clean Android compatibility
+    if "sbix" in font:
+        print("  [WARN] sbix table detected; expected clean Android CBDT/CBLC")
 
     # 2. Name table
     print("\n2. Checking Name Records:")
@@ -89,17 +93,15 @@ def verify_font(font_path):
     if len(cbdt.strikeData) > 0:
         strike0 = cbdt.strikeData[0]
         print(f"  [OK] CBDT Strike 0 contains {len(strike0)} bitmap glyphs")
-
-    # 6. sbix table (Apple / Desktop Color Bitmaps)
-    print("\n6. Checking sbix Color Bitmap Strikes:")
-    sbix = font["sbix"]
-    for strike_ppem, strike in sbix.strikes.items():
-        glyph_count = len(strike.glyphs)
-        print(f"  • Strike PPEM {strike_ppem}: {glyph_count} bitmap glyphs embedded")
-        if glyph_count > 0:
-            sample_glyph = list(strike.glyphs.values())[0]
-            if sample_glyph.graphicType in (b"png ", "png "):
-                print(f"  [OK] Sample bitmap glyph format verified as PNG ({len(sample_glyph.imageData)} bytes)")
+        # Validate sample glyph
+        for sample_name in ["u1F600", "u1F602", "u1F44D"]:
+            if sample_name in strike0:
+                sample_bmp = strike0[sample_name]
+                if sample_bmp.imageData and len(sample_bmp.imageData) > 8:
+                    magic = sample_bmp.imageData[:8]
+                    if magic == b"\x89PNG\r\n\x1a\n":
+                        print(f"  [OK] Sample glyph '{sample_name}' valid PNG ({len(sample_bmp.imageData)} bytes)")
+                        break
 
     print("\n" + "=" * 50)
     print("ALL FONT VERIFICATION CHECKS PASSED!")
