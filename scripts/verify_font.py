@@ -16,7 +16,7 @@ except ImportError:
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONT_PATH = os.path.join(PROJECT_ROOT, "build", "GoogleEmoji3D.ttf")
 
-REQUIRED_TABLES = ["head", "hhea", "maxp", "OS/2", "name", "post", "cmap", "sbix", "GSUB"]
+REQUIRED_TABLES = ["head", "hhea", "maxp", "OS/2", "name", "post", "cmap", "CBDT", "CBLC", "sbix", "GSUB"]
 
 def verify_font(font_path):
     print(f"[*] Verifying font: {font_path}")
@@ -82,8 +82,16 @@ def verify_font(font_path):
     if "liga" in feature_tags:
         print("  [OK] Standard ligature feature 'liga' found")
 
-    # 5. sbix table
-    print("\n5. Checking sbix Color Bitmap Strikes:")
+    # 5. CBDT table (Native Android / Instaprime Color Bitmaps)
+    print("\n5. Checking CBDT / CBLC Color Bitmap Strikes:")
+    cbdt = font["CBDT"]
+    print(f"  • CBDT strike count: {len(cbdt.strikeData)}")
+    if len(cbdt.strikeData) > 0:
+        strike0 = cbdt.strikeData[0]
+        print(f"  [OK] CBDT Strike 0 contains {len(strike0)} bitmap glyphs")
+
+    # 6. sbix table (Apple / Desktop Color Bitmaps)
+    print("\n6. Checking sbix Color Bitmap Strikes:")
     sbix = font["sbix"]
     for strike_ppem, strike in sbix.strikes.items():
         glyph_count = len(strike.glyphs)
