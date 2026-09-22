@@ -112,3 +112,16 @@
   - `.github/workflows/build-and-release.yml` (Modified)
   - `README.md` (Modified)
   - `Version.md` (Appended)
+
+### [2026-09-22 09:55:00 IST] Bump to v1.1.1 & Establish Continuous Patch Versioning Policy
+- **Status:** Upgraded to v1.1.1
+- **Version:** v1.1.1
+- **Repository:** https://github.com/mrdarksidetm/Google-Emoji-3D
+- **Summary:**
+  - Introduced `VERSION` file tracking current font package release version (starting at `1.1.1`).
+  - Upgraded `.github/workflows/build-and-release.yml` with dynamic version resolution step to publish GitHub releases matching the active `VERSION` tag (`v1.1.1`).
+  - Established continuous granular semantic patch versioning policy: every single update or glyph addition will automatically bump the patch version (e.g. v1.1.1 -> v1.1.2 -> v1.1.3).
+- **Files Created/Modified:**
+  - `VERSION` (Created with 1.1.1)
+  - `.github/workflows/build-and-release.yml` (Modified)
+  - `Version.md` (Appended)
