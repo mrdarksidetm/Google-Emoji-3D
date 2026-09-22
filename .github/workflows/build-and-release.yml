@@ -2,8 +2,8 @@ name: Build and Release Google Emoji 3D TTF
 
 on:
   schedule:
-    # Autonomous sync & rebuild when new 3D PNG assets are published by Google (Daily at 02:00 UTC)
-    - cron: '0 2 * * *'
+    # Autonomous sync & rebuild when new 3D PNG assets are published by Google (every 4 hours)
+    - cron: '0 */4 * * *'
   workflow_dispatch:
     inputs:
       resolution:
@@ -34,8 +34,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'output/png/**'
+      - 'scripts/**'
+      - 'data/**'
+      - '.github/workflows/**'
     tags:
       - 'v*'
+  repository_dispatch:
+    types: [new-pngs, sync-emojis, release]
 
 jobs:
   build-and-release:
